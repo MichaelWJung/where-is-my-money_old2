@@ -1,20 +1,12 @@
 (ns money.components.app-root
   (:require [reagent.core :as r]
             [reagent.react-native :as rn]
-            ; [money.default-components]
             [money.default-components :refer [navigation-container
                                               navigator
                                               screen]]
-            #_[money.default-components :refer [text view
-                                                touchable-highlight
-                                                navigation-container
-                                                navigator
-                                                screen]]
             [money.components.account-overview :refer [account-list
                                                        account-overview]]
             [money.components.transaction-screen :refer [transaction-screen]]))
-
-(def ReactNative (js/require "react-native"))
 
 (defn home-screen []
   (fn [{:keys [navigation]}]
