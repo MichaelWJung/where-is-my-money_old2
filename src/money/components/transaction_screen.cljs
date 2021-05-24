@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.react-native :as rn]
             [re-frame.core :refer [dispatch subscribe]]
-            [money.default-components :refer [#_date-time-picker
+            [money.default-components :refer [date-time-picker
                                               touchable-native-feedback]]
             [money.core.presenters.transaction-presenter :as tp]))
 
@@ -17,8 +17,7 @@
           {:on-press #(reset! editing-date true)}
           [rn/text {:style {:margin 10 :font-size 20}} "Date: " (::tp/date d)]]
          (if @editing-date
-           [rn/text "Date time picker here!"]
-           #_[date-time-picker
+           [date-time-picker
             {:value (js/Date. (::tp/date d))
              :on-change (fn [_ date]
                           (if (some? date)

@@ -3,8 +3,7 @@
             ["react-native" :as ReactNative]
             ["@react-navigation/native" :refer [NavigationContainer]]
             ["@react-navigation/stack" :refer [createStackNavigator]]
-            ; ["@react-native-community/datetimepicker" :as DateTimePicker]
-            ))
+            ["@react-native-community/datetimepicker" :as DateTimePicker]))
 
 ; (def ReactNative (js/require "react-native"))
 
@@ -18,12 +17,11 @@
 (def touchable-native-feedback (r/adapt-react-class (.-TouchableNativeFeedback ReactNative)))
 
 (def navigation-container (r/adapt-react-class NavigationContainer))
-(prn navigation-container)
 (def stack (createStackNavigator))
 (def navigator (r/adapt-react-class (.-Navigator stack)))
 (def screen (r/adapt-react-class (.-Screen stack)))
 
-; (def date-time-picker (r/adapt-react-class (aget DateTimePicker "default")))
+(def date-time-picker (r/adapt-react-class (aget DateTimePicker "default")))
 
-; (defn alert [title]
-;       (.alert (.-Alert ReactNative) title))
+(defn alert [title]
+      (.alert (.-Alert ReactNative) title))
