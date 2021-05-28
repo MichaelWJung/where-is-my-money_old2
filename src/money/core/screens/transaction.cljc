@@ -74,8 +74,8 @@
         (ex-info "Cannot convert transactions with more than two splits" {})))
     (let [our-split (get-split-with-id splits account)
           other-split (get-other-split splits account)]
-      (prn our-split)
-      (prn other-split)
+      ; (prn our-split)
+      ; (prn other-split)
       {::description description
        ::date date
        ::account-id (::t/account other-split)

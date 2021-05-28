@@ -20,7 +20,7 @@
 (rf/reg-sub
   :current-account
   (fn [db _]
-    (prn "db " db)
+    ; (prn "db " db)
     (get-in db [::db/screen-states ::sa/account-screen-state ::sa/account-id])))
 
 (rf/reg-sub
@@ -40,8 +40,8 @@
   :<- [:current-account]
   :<- [:accounts]
   (fn [[current-account accounts] _]
-    (prn "accs" accounts)
-    (prn "current" current-account)
+    ; (prn "accs" accounts)
+    ; (prn "current" current-account)
     (ap/present-account-list accounts current-account)))
 
 (rf/reg-sub
@@ -57,7 +57,7 @@
   :<- [:current-account-reduced-transactions]
   :<- [:accounts]
   (fn [[reduced-transactions accounts] _]
-    (prn "rt a" reduced-transactions accounts)
+    ; (prn "rt a" reduced-transactions accounts)
     (ap/present-transactions reduced-transactions accounts "en-US")))
 
 (rf/reg-sub
