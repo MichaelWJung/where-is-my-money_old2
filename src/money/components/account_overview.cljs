@@ -1,7 +1,6 @@
 (ns money.components.account-overview
   (:require [reagent.react-native :as rn]
-            [re-frame.core :refer [dispatch subscribe]]
-            [money.default-components :refer [touchable-native-feedback]]))
+            [re-frame.core :refer [dispatch subscribe]]))
 
 (defn account-list []
   (let [accounts (subscribe [:account-names])]
@@ -9,13 +8,13 @@
       [rn/view
        (for [[idx acc-name] (map-indexed vector (:account-names @accounts))]
          ^{:key idx}
-         [touchable-native-feedback
+         [rn/touchable-without-feedback
           {:on-press #(do (dispatch [:set-account idx])
                           (.navigate navigation "Account-Overview"))}
           [rn/text {:style {:font-size 24 :padding 8}} acc-name]])])))
 
 (defn transaction [{:keys [data navigation]}]
-  [touchable-native-feedback
+  [rn/touchable-without-feedback
    {:on-press (fn []
                 (dispatch [:edit-transaction (:id data)])
                 (.navigate navigation "Transaction"))}

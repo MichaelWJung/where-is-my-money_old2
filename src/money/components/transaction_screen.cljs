@@ -2,8 +2,7 @@
   (:require [reagent.core :as r]
             [reagent.react-native :as rn]
             [re-frame.core :refer [dispatch subscribe]]
-            [money.default-components :refer [date-time-picker
-                                              touchable-native-feedback]]
+            [money.default-components :refer [date-time-picker]]
             [money.core.presenters.transaction-presenter :as tp]))
 
 (defn transaction-screen []
@@ -13,7 +12,7 @@
       (let [d @data]
         [rn/view
          [rn/text "Description: " (::tp/description d)]
-         [touchable-native-feedback
+         [rn/touchable-without-feedback
           {:on-press #(reset! editing-date true)}
           [rn/text {:style {:margin 10 :font-size 20}} "Date: " (::tp/date d)]]
          (if @editing-date
