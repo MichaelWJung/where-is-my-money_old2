@@ -1,5 +1,6 @@
 (ns money.components.account-overview
   (:require [money.components.utils :refer [js->clj-keywordized]]
+            [money.default-components :refer [pressable]]
             [reagent.core :as r]
             [reagent.react-native :as rn]
             [re-frame.core :refer [dispatch subscribe]]))
@@ -7,19 +8,22 @@
 (defn account-list []
   (let [accounts (subscribe [:account-names])]
     (fn [{:keys [navigation]}]
-      [rn/view
+      [rn/view {:style {:width "100%"
+                        :height "100%"}}
        (for [[idx acc-name] (map-indexed vector (:account-names @accounts))]
          ^{:key idx}
-         [rn/touchable-without-feedback
+         [pressable
           {:on-press #(do (dispatch [:set-account idx])
-                          (.navigate navigation "Account-Overview"))}
+                          (.navigate navigation "Account-Overview"))
+           :android_ripple (clj->js {:color "gray"})}
           [rn/text {:style {:font-size 24 :padding 8}} acc-name]])])))
 
 (defn transaction [{:keys [item]} navigation]
-  [rn/touchable-without-feedback
+  [pressable
    {:on-press (fn []
                 (dispatch [:edit-transaction (:id item)])
-                (.navigate navigation "Transaction"))}
+                (.navigate navigation "Transaction"))
+    :android_ripple (clj->js {:color "gray"})}
    [rn/view
     [rn/view {:style {:flex-direction "row"}}
      [rn/text {:style {:color "black" :font-size 16

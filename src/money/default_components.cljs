@@ -5,7 +5,7 @@
             ["@react-navigation/stack" :refer [createStackNavigator]]
             ["@react-native-community/datetimepicker" :as DateTimePicker]))
 
-; (def touchable-native-feedback (r/adapt-react-class (.-TouchableNativeFeedback ReactNative)))
+(def pressable (r/adapt-react-class (.-Pressable ReactNative)))
 
 (def navigation-container (r/adapt-react-class NavigationContainer))
 (def stack (createStackNavigator))
