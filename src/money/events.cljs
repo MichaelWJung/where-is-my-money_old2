@@ -1,5 +1,6 @@
 (ns money.events
   (:require [money.db :as db]
+            [money.navigation :refer [!navigation]]
             ; [money.store :refer [data->store]]
             [clojure.spec.alpha :as s]
             [money.core.adapters.account :as aa]
@@ -27,6 +28,12 @@
 (def data-interceptors [check-spec-interceptor
                         ; ->store
                         ])
+
+(rf/reg-fx
+  :navigate
+  (fn [target]
+    (let [navigation @!navigation]
+      (.navigate navigation target))))
 
 (rf/reg-cofx
   :now
@@ -132,3 +139,8 @@
     (-> db
         (update-in [::db/screen-states] dissoc ::st/transaction-screen-state)
         (assoc :navigation :account))))
+
+(rf/reg-event-fx
+  :navigate
+  (fn [_ [_ target]]
+    {:navigate target}))

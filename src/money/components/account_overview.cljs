@@ -14,7 +14,7 @@
          ^{:key idx}
          [pressable
           {:on-press #(do (dispatch [:set-account idx])
-                          (.navigate navigation "Account-Overview"))
+                          (dispatch [:navigate "Account-Overview"]))
            :android_ripple (clj->js {:color "gray"})}
           [rn/text {:style {:font-size 24 :padding 8}} acc-name]])])))
 
@@ -22,7 +22,7 @@
   [pressable
    {:on-press (fn []
                 (dispatch [:edit-transaction (:id item)])
-                (.navigate navigation "Transaction"))
+                (dispatch [:navigate "Transaction"]))
     :android_ripple (clj->js {:color "gray"})}
    [rn/view
     [rn/view {:style {:flex-direction "row"}}
