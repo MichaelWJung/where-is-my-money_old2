@@ -13,16 +13,13 @@
        (for [[idx acc-name] (map-indexed vector (:account-names @accounts))]
          ^{:key idx}
          [pressable
-          {:on-press #(do (dispatch [:set-account idx])
-                          (dispatch [:navigate "Account-Overview"]))
+          {:on-press #(dispatch [:set-account idx])
            :android_ripple (clj->js {:color "gray"})}
           [rn/text {:style {:font-size 24 :padding 8}} acc-name]])])))
 
 (defn transaction [{:keys [item]}]
   [pressable
-   {:on-press (fn []
-                (dispatch [:edit-transaction (:id item)])
-                (dispatch [:navigate "Transaction"]))
+   {:on-press #(dispatch [:edit-transaction (:id item)])
     :android_ripple (clj->js {:color "gray"})}
    [rn/view
     [rn/view {:style {:flex-direction "row"}}
