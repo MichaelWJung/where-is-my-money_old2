@@ -7,7 +7,7 @@
 
 (defn account-list []
   (let [accounts (subscribe [:account-names])]
-    (fn [{:keys [navigation]}]
+    (fn []
       [rn/view {:style {:width "100%"
                         :height "100%"}}
        (for [[idx acc-name] (map-indexed vector (:account-names @accounts))]
@@ -18,7 +18,7 @@
            :android_ripple (clj->js {:color "gray"})}
           [rn/text {:style {:font-size 24 :padding 8}} acc-name]])])))
 
-(defn transaction [{:keys [item]} navigation]
+(defn transaction [{:keys [item]}]
   [pressable
    {:on-press (fn []
                 (dispatch [:edit-transaction (:id item)])
@@ -45,14 +45,13 @@
                        :padding-start 8 :padding-bottom 8 :padding-end 8}}
       (:balance item)]]]])
 
-(defn render-transaction [navigation]
-  (fn [props]
-    (r/as-element [transaction (js->clj-keywordized props) navigation])))
+(defn render-transaction [props]
+  (r/as-element [transaction (js->clj-keywordized props)]))
 
 (defn account-overview []
   (let [overview (subscribe [:account-overview])]
-    (fn [{:keys [navigation]}]
+    (fn []
       [rn/flat-list {:data @overview
-                     :renderItem (render-transaction navigation)}])))
+                     :renderItem render-transaction}])))
 
 
