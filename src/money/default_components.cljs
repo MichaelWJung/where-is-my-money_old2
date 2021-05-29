@@ -1,11 +1,11 @@
 (ns money.default-components
   (:require [reagent.core :as r]
-            ["react-native" :as ReactNative]
+            [react-native :as rn]
             ["@react-navigation/native" :refer [NavigationContainer]]
             ["@react-navigation/stack" :refer [createStackNavigator]]
             ["@react-native-community/datetimepicker" :as DateTimePicker]))
 
-(def pressable (r/adapt-react-class (.-Pressable ReactNative)))
+(def pressable (r/adapt-react-class rn/Pressable))
 
 (def navigation-container (r/adapt-react-class NavigationContainer))
 (def stack (createStackNavigator))
@@ -14,5 +14,5 @@
 
 (def date-time-picker (r/adapt-react-class (aget DateTimePicker "default")))
 
-(defn alert [title]
-      (.alert (.-Alert ReactNative) title))
+; (defn alert [title]
+;       (.alert (.-Alert ReactNative) title))
