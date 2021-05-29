@@ -1,11 +1,11 @@
 (ns money.android.core
-  (:require [reagent.core :as r]
+  (:require ["react-native-gesture-handler"]
+            [reagent.core :as r]
             [re-frame.core :refer [dispatch-sync]]
             [money.components.app-root :refer [root]]
             [money.events]
             [money.subs]))
 
-(def ReactNativeGestureHandler (js/require "react-native-gesture-handler"))
 ; (def ReactNative (js/require "react-native"))
 ; (def app-registry (.-AppRegistry ReactNative))
 
