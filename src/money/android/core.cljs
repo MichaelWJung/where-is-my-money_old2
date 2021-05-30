@@ -1,8 +1,10 @@
 (ns money.android.core
   (:require ["react-native-gesture-handler"]
+            [cljs.reader]
             [reagent.core :as r]
-            [re-frame.core :refer [dispatch-sync]]
+            [re-frame.core :refer [dispatch dispatch-sync]]
             [money.components.app-root :refer [root]]
+            [money.db :refer [generated-db]]
             [money.events]
             [money.subs]))
 
@@ -13,7 +15,12 @@
   [root])
 
 (defn ^:export -main [& args]
-  (dispatch-sync [:initialize-db {}])
+  (dispatch-sync [:initialize-db])
+  (-> money.events/async-storage
+      (.getItem "db")
+      (.then #(dispatch [:load-db (cljs.reader/read-string %)]))
+      (.catch #(prn %))
+      (.finally #(dispatch [:db-ready])))
   (r/as-element [app-root]))
 
 ; (defn init []

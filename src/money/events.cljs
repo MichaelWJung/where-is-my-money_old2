@@ -1,13 +1,16 @@
 (ns money.events
-  (:require [money.db :as db]
+  (:require [clojure.spec.alpha :as s]
+            [money.db :as db]
             [money.navigation :refer [!navigation]]
-            ; [money.store :refer [data->store]]
-            [clojure.spec.alpha :as s]
             [money.core.adapters.account :as aa]
             [money.core.screens.account :as sa]
             [money.core.screens.transaction :as st]
             [money.core.transaction :as t]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            ["@react-navigation/native" :refer [StackActions]]
+            ["@react-native-async-storage/async-storage" :as AsyncStorage]))
+
+(def async-storage (aget AsyncStorage "default"))
 
 (defn check-and-throw
   "Throws an exception if `db` doesn’t match the Spec `a-spec`."
@@ -19,21 +22,38 @@
 
 (def check-spec-interceptor (rf/after (partial check-and-throw :money.db/db)))
 
-; (def ->store (rf/after data->store))
+(def ->store
+  (rf/->interceptor
+    :id :->store
+    :after (fn [context]
+             (rf/assoc-effect context :persist (rf/get-effect context :db)))))
 
 (def transaction-interceptors [check-spec-interceptor
-                               ; ->store
+                               ->store
                                (rf/path :data :transactions)])
 
 (def data-interceptors [check-spec-interceptor
-                        ; ->store
-                        ])
+                        ->store])
 
 (rf/reg-fx
  :navigate
  (fn [target]
    (let [navigation @!navigation]
      (.navigate navigation target))))
+
+(rf/reg-fx
+  :reset-navigation
+  (fn [_]
+    (let [navigation @!navigation]
+      (.dispatch navigation (.replace StackActions "Home")))))
+
+(rf/reg-fx
+ :persist
+ (fn [db]
+   (let [db-reduced (dissoc db ::db/startup)]
+     (-> async-storage
+         (.setItem "db" (str db-reduced))
+         (.catch #(prn "Error: " %))))))
 
 (rf/reg-cofx
  :now
@@ -43,8 +63,14 @@
 (rf/reg-event-db
  :initialize-db
  [check-spec-interceptor]
- (fn [_ [_ stored]]
-   (merge db/default-db stored)))
+ (fn [_ _]
+   db/default-db))
+
+(rf/reg-event-db
+  :load-db
+  [check-spec-interceptor]
+  (fn [db [_ stored]]
+    (merge db stored)))
 
 (rf/reg-event-fx
  :set-account
@@ -54,7 +80,7 @@
      {:db (assoc-in db
                     [::db/screen-states ::sa/account-screen-state ::sa/account-id]
                     (aa/account-idx->id accounts account-idx))
-      :navigate "Account-Overview"})))
+      :fx [[:navigate "Account-Overview"]]})))
 
 (rf/reg-event-db
  :remove-transaction
@@ -116,7 +142,7 @@
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/transaction->screen-data current-account transaction))
               (assoc :navigation :transaction))
-      :navigate "Transaction"})))
+      :fx [[:navigate "Transaction"]]})))
 
 (rf/reg-event-fx
  :new-transaction
@@ -142,3 +168,27 @@
        (update-in [::db/screen-states] dissoc ::st/transaction-screen-state)
        (assoc :navigation :account))))
 
+(rf/reg-event-fx
+ :ui-ready
+ [check-spec-interceptor]
+ (fn [{:keys [db]} _]
+   {:db (assoc-in db [::db/startup ::db/ui-ready?] true)
+    :fx [[:dispatch [:check-startup]]]}))
+
+(rf/reg-event-fx
+ :db-ready
+ [check-spec-interceptor]
+ (fn [{:keys [db]} _]
+   {:db (assoc-in db [::db/startup ::db/db-ready?] true)
+    :fx [[:dispatch [:check-startup]]]}))
+
+(rf/reg-event-fx
+ :check-startup
+ [check-spec-interceptor]
+ (fn [{:keys [db]} _]
+   (let [ui-ready? (get-in db [::db/startup ::db/ui-ready?])
+         db-ready? (get-in db [::db/startup ::db/db-ready?])]
+     (if (and ui-ready? db-ready?)
+       {:db db
+        :fx [[:reset-navigation nil]]}
+       {:db db}))))

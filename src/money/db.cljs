@@ -13,7 +13,12 @@
 
 (s/def ::navigation #{:transaction :account})
 
-(s/def ::db (s/keys :req-un [::data ::navigation]))
+(s/def ::db-ready? boolean?)
+(s/def ::ui-ready? boolean?)
+(s/def ::startup (s/keys :req [::db-ready? ::ui-ready?]))
+
+(s/def ::db (s/keys :req-un [::data ::navigation]
+                    :req [::startup]))
 
 (defn- index-to-amount [i]
   (mod (* i 123) 129))
@@ -59,6 +64,16 @@
   (into {} (map generate-account (range 6))))
 
 (def default-db
+  {:data {:transactions {}
+          :accounts (conj {} (generate-account 0))
+          :currencies []}
+   ::screen-states {::sa/account-screen-state
+                    {::sa/account-id 0}}
+   :navigation :account
+   ::startup {::db-ready? false ::ui-ready? false}
+   :highest-ids {:transaction 1}})
+
+(def generated-db
   {:data {:transactions (generate-transactions)
           :accounts (generate-accounts)
           :currencies []}
