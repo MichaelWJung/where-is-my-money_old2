@@ -6,7 +6,7 @@
             [money.core.screens.transaction :as st]))
 
 (s/def ::currencies (constantly true))
-(s/def ::data (s/keys :req-un [::t/transactions ::a/accounts ::currencies]))
+(s/def ::data (s/keys :req [::a/accounts ::t/transactions ::currencies]))
 
 (s/def ::screen-states (s/keys :req [::sa/account-screen-state]
                                :opt [::st/transaction-screen-state]))
@@ -17,8 +17,7 @@
 (s/def ::ui-ready? boolean?)
 (s/def ::startup (s/keys :req [::db-ready? ::ui-ready?]))
 
-(s/def ::db (s/keys :req-un [::data ::navigation]
-                    :req [::startup]))
+(s/def ::db (s/keys :req [::data ::navigation ::startup]))
 
 (defn- index-to-amount [i]
   (mod (* i 123) 129))
@@ -64,20 +63,20 @@
   (into {} (map generate-account (range 6))))
 
 (def default-db
-  {:data {:transactions {}
-          :accounts (conj {} (generate-account 0))
-          :currencies []}
+  {::data {::t/transactions {}
+          ::a/accounts (conj {} (generate-account 0))
+          ::currencies []}
    ::screen-states {::sa/account-screen-state
                     {::sa/account-id 0}}
-   :navigation :account
+   ::navigation :account
    ::startup {::db-ready? false ::ui-ready? false}
    :highest-ids {:transaction 1}})
 
 (def generated-db
-  {:data {:transactions (generate-transactions)
-          :accounts (generate-accounts)
-          :currencies []}
+  {::data {::t/transactions (generate-transactions)
+          ::a/accounts (generate-accounts)
+          ::currencies []}
    ::screen-states {::sa/account-screen-state
                     {::sa/account-id 0}}
-   :navigation :account
+   ::navigation :account
    :highest-ids {:transaction 1}})

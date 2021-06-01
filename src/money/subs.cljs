@@ -1,6 +1,7 @@
 (ns money.subs
   (:require [re-frame.core :as rf]
             [money.db :as db]
+            [money.core.account :as a]
             [money.core.presenters.account-presenter :as ap]
             [money.core.presenters.transaction-presenter :as tp]
             [money.core.screens.account :as sa]
@@ -10,12 +11,12 @@
 (rf/reg-sub
   :accounts
   (fn [db _]
-    (get-in db [:data :accounts])))
+    (get-in db [::db/data ::a/accounts])))
 
 (rf/reg-sub
   :transactions
   (fn [db _]
-    (get-in db [:data :transactions])))
+    (get-in db [::db/data ::t/transactions])))
 
 (rf/reg-sub
   :current-account
@@ -63,7 +64,7 @@
 (rf/reg-sub
   :current-screen
   (fn [db _]
-    (:navigation db)))
+    (::db/navigation db)))
 
 (rf/reg-sub
   :transaction-screen

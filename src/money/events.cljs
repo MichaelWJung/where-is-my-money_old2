@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [money.db :as db]
             [money.navigation :refer [!navigation]]
+            [money.core.account :as a]
             [money.core.adapters.account :as aa]
             [money.core.screens.account :as sa]
             [money.core.screens.transaction :as st]
@@ -30,7 +31,7 @@
 
 (def transaction-interceptors [check-spec-interceptor
                                ->store
-                               (rf/path :data :transactions)])
+                               (rf/path ::db/data ::t/transactions)])
 
 (def data-interceptors [check-spec-interceptor
                         ->store])
@@ -81,7 +82,7 @@
  :set-account
  data-interceptors
  (fn [{:keys [db]} [_ account-idx]]
-   (let [accounts (get-in db [:data :accounts])]
+   (let [accounts (get-in db [::db/data ::a/accounts])]
      {:db (assoc-in db
                     [::db/screen-states ::sa/account-screen-state ::sa/account-id]
                     (aa/account-idx->id accounts account-idx))
@@ -108,7 +109,7 @@
  (fn [db [_ transaction-data]]
    (if-not (contains? (::db/screen-states db) ::st/transaction-screen-state)
      db
-     (let [accounts (get-in db [:data :accounts])]
+     (let [accounts (get-in db [::db/data ::a/accounts])]
        (try
          (update-in db
                     [::db/screen-states ::st/transaction-screen-state]
@@ -131,22 +132,22 @@
          new-transaction
          (st/screen-data->transaction current-account screen-data)]
      (-> db
-         (update-in [:data :transactions]
+         (update-in [::db/data ::t/transactions]
                     #(t/add-transaction % new-transaction))
-         (assoc :navigation :account)))))
+         (assoc ::db/navigation :account)))))
 
 (rf/reg-event-fx
  :edit-transaction
  data-interceptors
  (fn [{:keys [db]} [_ id]]
-   (let [transaction (get-in db [:data :transactions id])
+   (let [transaction (get-in db [::db/data ::t/transactions id])
          current-account (get-in db [::db/screen-states
                                      ::sa/account-screen-state
                                      ::sa/account-id])]
      {:db (-> db
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/transaction->screen-data current-account transaction))
-              (assoc :navigation :transaction))
+              (assoc ::db/navigation :transaction))
       :fx [[:navigate "Transaction"]]})))
 
 (rf/reg-event-fx
@@ -163,7 +164,7 @@
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/new-transaction id now 0))
               (assoc-in [:highest-ids :transaction] id)
-              (assoc :navigation :transaction))})))
+              (assoc ::db/navigation :transaction))})))
 
 (rf/reg-event-db
  :close-transaction-screen
@@ -171,7 +172,7 @@
  (fn [db _]
    (-> db
        (update-in [::db/screen-states] dissoc ::st/transaction-screen-state)
-       (assoc :navigation :account))))
+       (assoc ::db/navigation :account))))
 
 (rf/reg-event-fx
  :ui-ready
