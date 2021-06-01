@@ -14,14 +14,22 @@
 (defn app-root []
   [root])
 
+(defn- use-default-db []
+  (dispatch [:load-db generated-db])
+  (dispatch [:toast "App db filled with generated defaults"]))
+
+(defn- load-db [serialized]
+  (dispatch [:load-db (cljs.reader/read-string serialized)])
+  (dispatch [:toast "App db loaded from storage"]))
+
 (defn ^:export -main [& args]
   (dispatch-sync [:initialize-db])
   (-> money.events/async-storage
       (.getItem "db")
       (.then #(if (nil? %)
-                (dispatch [:load-db generated-db])
-                (dispatch [:load-db (cljs.reader/read-string %)])))
-      (.catch #(dispatch [:load-db generated-db]))
+                (use-default-db)
+                (load-db %)))
+      (.catch use-default-db)
       (.finally #(dispatch [:db-ready])))
   (r/as-element [app-root]))
 

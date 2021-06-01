@@ -7,6 +7,7 @@
             [money.core.screens.transaction :as st]
             [money.core.transaction :as t]
             [re-frame.core :as rf]
+            ["react-native" :refer [ToastAndroid]]
             ["@react-navigation/native" :refer [StackActions]]
             ["@react-native-async-storage/async-storage" :as AsyncStorage]))
 
@@ -49,10 +50,15 @@
 (rf/reg-fx
  :persist
  (fn [db]
-   (let [db-reduced (dissoc db ::db/startup)]
+   (let [serialized (str (dissoc db ::db/startup))]
      (-> async-storage
-         (.setItem "db" (str db-reduced))
+         (.setItem "db" serialized)
          (.catch #(prn "Error: " %))))))
+
+(rf/reg-fx
+  :show-toast
+  (fn [message]
+    (.show ToastAndroid message (.-SHORT ToastAndroid))))
 
 (rf/reg-cofx
  :now
@@ -191,3 +197,9 @@
        {:db db
         :fx [[:reset-navigation nil]]}
        {:db db}))))
+
+(rf/reg-event-fx
+  :toast
+  (fn [{:keys [db]} [_ message]]
+    {:db db
+     :fx [[:show-toast message]]}))
