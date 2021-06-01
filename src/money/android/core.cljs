@@ -18,8 +18,10 @@
   (dispatch-sync [:initialize-db])
   (-> money.events/async-storage
       (.getItem "db")
-      (.then #(dispatch [:load-db (cljs.reader/read-string %)]))
-      (.catch #(prn %))
+      (.then #(if (nil? %)
+                (dispatch [:load-db generated-db])
+                (dispatch [:load-db (cljs.reader/read-string %)])))
+      (.catch #(dispatch [:load-db generated-db]))
       (.finally #(dispatch [:db-ready])))
   (r/as-element [app-root]))
 

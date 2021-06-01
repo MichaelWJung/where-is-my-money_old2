@@ -15,7 +15,6 @@
 (defn check-and-throw
   "Throws an exception if `db` doesn’t match the Spec `a-spec`."
   [a-spec db]
-  ; (prn db)
   (when-not (s/valid? a-spec db)
     (println "db: " db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
@@ -44,7 +43,7 @@
 (rf/reg-fx
   :reset-navigation
   (fn [_]
-    (let [navigation @!navigation]
+    (let [^js navigation @!navigation]
       (.dispatch navigation (.replace StackActions "Home")))))
 
 (rf/reg-fx
