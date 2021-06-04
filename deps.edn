@@ -6,9 +6,18 @@
                          :exclusions [cljsjs/react cljsjs/react-dom]}
         re-frame/re-frame {:mvn/version "1.1.2"}}
 
- :aliases
- {:test {:extra-paths ["test"]
-         :main-opts ["-m" "cljs.main"
-                     "-i" "test/money/test_runner.cljs"
-                     "-re" "node"
-                     "-e" "(money.test-runner/-main)"]}}}
+ :aliases {:test {:extra-paths ["test"]
+                  :main-opts ["-m" "cljs.main"
+                              "-i" "test/money/test_runner.cljs"
+                              "-re" "node"
+                              "-e" "(money.test-runner/-main)"]}
+           :build {:main-opts ["-m" "krell.main"
+                               "-co" "build.edn"
+                               "-c"]}
+           :repl {:main-opts ["-m" "krell.main"
+                              "-co" "build.edn"
+                              "-r"]}
+           :release {:main-opts ["-m" "krell.main"
+                                 "-co" "build.edn"
+                                 "-O" "advanced"
+                                 "-c"]}}}
