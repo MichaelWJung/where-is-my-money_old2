@@ -4,4 +4,11 @@
                                        :sha "0fe1c600c9b81180f76b94ef6004c2f85e7d4aa0"}
         reagent/reagent {:mvn/version "1.0.0"
                          :exclusions [cljsjs/react cljsjs/react-dom]}
-        re-frame/re-frame {:mvn/version "1.1.2"}}}
+        re-frame/re-frame {:mvn/version "1.1.2"}}
+
+ :aliases
+ {:test {:extra-paths ["test"]
+         :main-opts ["-m" "cljs.main"
+                     "-i" "test/money/test_runner.cljs"
+                     "-re" "node"
+                     "-e" "(money.test-runner/-main)"]}}}
