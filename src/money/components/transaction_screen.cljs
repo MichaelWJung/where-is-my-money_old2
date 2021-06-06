@@ -21,6 +21,7 @@
       [text-input
        {:label "Amount"
         :default-value @amount
+        :keyboard-type "numeric"
         :on-change-text #(dispatch [:update-transaction-amount (js/parseFloat %)])}])))
 
 (defn date-field []

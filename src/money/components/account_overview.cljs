@@ -1,5 +1,6 @@
 (ns money.components.account-overview
   (:require [money.components.utils :refer [js->clj-keywordized]]
+            [money.core.presenters.account-presenter :as ap]
             [money.default-components :refer [fab portal portal-host pressable]]
             [reagent.core :as r]
             [reagent.react-native :as rn]
@@ -46,12 +47,17 @@
 (defn render-transaction [props]
   (r/as-element [transaction (js->clj-keywordized props)]))
 
+(defn key-extractor [item index]
+  (let [i (js->clj-keywordized item)]
+    (str (:id i) "_" (:split-id i))))
+
 (defn account-overview-fn []
   (let [is-focused? (rnn/useIsFocused)
         overview (subscribe [:account-overview])]
     [rn/view {:style {:container {:flex 1}}}
      [rn/flat-list {:data @overview
-                    :renderItem render-transaction}]
+                    :renderItem render-transaction
+                    :key-extractor key-extractor}]
      [portal
       [fab {:icon "plus"
             :visible is-focused?
