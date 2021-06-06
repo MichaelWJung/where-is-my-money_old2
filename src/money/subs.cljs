@@ -92,3 +92,9 @@
   :<- [:transaction-screen]
   (fn [screen _]
     (::tp/date screen)))
+
+(rf/reg-sub
+  :transaction-screen-ok-button-text
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/ok-button-text screen)))

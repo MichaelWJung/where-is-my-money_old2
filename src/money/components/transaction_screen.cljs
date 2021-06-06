@@ -41,11 +41,15 @@
                             (dispatch [:update-transaction-date unix-time])))
                         (reset! editing-date false))}])])))
 
+(defn ok-button []
+  (let [button-text (subscribe [:transaction-screen-ok-button-text])]
+    [button {:mode "contained"
+             :on-press #(dispatch [:save-transaction])}
+     @button-text]))
+
 (defn transaction-screen []
   [:<>
    [description-input]
    [amount-input]
    [date-field]
-   [button {:mode "contained"
-            :on-press #(dispatch [:save-transaction])}
-    "Save"]])
+   [ok-button]])
