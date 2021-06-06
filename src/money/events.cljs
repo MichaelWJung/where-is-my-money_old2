@@ -106,6 +106,12 @@
                 #(st/update-transaction-date % date)))))
 
 (rf/reg-event-db
+  :update-transaction-amount
+  transaction-screen-interceptors
+  (fn [screen-state [_ amount]]
+    (assoc screen-state ::st/amount amount)))
+
+(rf/reg-event-db
   :update-transaction-description
   transaction-screen-interceptors
   (fn [screen-state [_ description]]

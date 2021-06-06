@@ -15,6 +15,14 @@
         :default-value @description
         :on-change-text #(dispatch [:update-transaction-description %])}])))
 
+(defn amount-input []
+  (let [amount (subscribe [:transaction-screen-amount])]
+    (fn []
+      [text-input
+       {:label "Amount"
+        :default-value @amount
+        :on-change-text #(dispatch [:update-transaction-amount (js/parseFloat %)])}])))
+
 (defn date-field []
   (let [date (subscribe [:transaction-screen-date])
         editing-date (r/atom false)]
@@ -35,6 +43,7 @@
 (defn transaction-screen []
   [:<>
    [description-input]
+   [amount-input]
    [date-field]
    [button {:mode "contained"
             :on-press #(dispatch [:save-transaction])}

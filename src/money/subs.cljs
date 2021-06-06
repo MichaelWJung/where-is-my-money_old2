@@ -82,6 +82,12 @@
     (::tp/description screen)))
 
 (rf/reg-sub
+  :transaction-screen-amount
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/amount screen)))
+
+(rf/reg-sub
   :transaction-screen-date
   :<- [:transaction-screen]
   (fn [screen _]
