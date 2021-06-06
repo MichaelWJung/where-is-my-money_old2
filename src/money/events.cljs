@@ -9,7 +9,7 @@
             [money.core.transaction :as t]
             [re-frame.core :as rf]
             ["react-native" :refer [ToastAndroid]]
-            ["@react-navigation/native" :refer [StackActions]]
+            ["@react-navigation/native" :refer [CommonActions StackActions]]
             ["@react-native-async-storage/async-storage" :as AsyncStorage]))
 
 (def async-storage (aget AsyncStorage "default"))
@@ -37,16 +37,13 @@
                         ->store])
 
 (rf/reg-fx
- :navigate
- (fn [target]
-   (let [navigation @!navigation]
-     (.navigate navigation target))))
-
-(rf/reg-fx
-  :reset-navigation
-  (fn [_]
+  :navigation
+  (fn [[action target]]
     (let [^js navigation @!navigation]
-      (.dispatch navigation (.replace StackActions "Home")))))
+      (case action
+        :go-back (.dispatch navigation (.goBack CommonActions))
+        :navigate (.navigate navigation target)
+        :reset (.dispatch navigation (.replace StackActions "Home"))))))
 
 (rf/reg-fx
  :persist
@@ -86,7 +83,7 @@
      {:db (assoc-in db
                     [::db/screen-states ::sa/account-screen-state ::sa/account-id]
                     (aa/account-idx->id accounts account-idx))
-      :fx [[:navigate "Account-Overview"]]})))
+      :fx [[:navigation [:navigate "Account-Overview"]]]})))
 
 (rf/reg-event-db
  :remove-transaction
@@ -118,10 +115,10 @@
            (prn (ex-data e))
            db))))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  :save-transaction
  data-interceptors
- (fn [db _]
+ (fn [{:keys [db]} _]
    (let [screen-data
          (get-in db [::db/screen-states ::st/transaction-screen-state])
 
@@ -131,10 +128,11 @@
 
          new-transaction
          (st/screen-data->transaction current-account screen-data)]
-     (-> db
-         (update-in [::db/data ::t/transactions]
-                    #(t/add-transaction % new-transaction))
-         (assoc ::db/navigation :account)))))
+     {:db (-> db
+              (update-in [::db/data ::t/transactions]
+                         #(t/add-transaction % new-transaction))
+              (assoc ::db/navigation :account))
+      :fx [[:navigation [:go-back]]]})))
 
 (rf/reg-event-fx
  :edit-transaction
@@ -148,7 +146,7 @@
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/transaction->screen-data current-account transaction))
               (assoc ::db/navigation :transaction))
-      :fx [[:navigate "Transaction"]]})))
+      :fx [[:navigation [:navigate "Transaction"]]]})))
 
 (rf/reg-event-fx
  :new-transaction
@@ -164,7 +162,8 @@
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/new-transaction id now 0))
               (assoc-in [:highest-ids :transaction] id)
-              (assoc ::db/navigation :transaction))})))
+              (assoc ::db/navigation :transaction))
+      :fx [[:navigation [:navigate "Transaction"]]]})))
 
 (rf/reg-event-db
  :close-transaction-screen
@@ -196,7 +195,7 @@
          db-ready? (get-in db [::db/startup ::db/db-ready?])]
      (if (and ui-ready? db-ready?)
        {:db db
-        :fx [[:reset-navigation nil]]}
+        :fx [[:navigation [:reset]]]}
        {:db db}))))
 
 (rf/reg-event-fx

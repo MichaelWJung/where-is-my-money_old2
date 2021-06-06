@@ -4,6 +4,7 @@
             [re-frame.core :refer [dispatch]]
             [money.default-components :refer [navigation-container
                                               navigator
+                                              paper-provider
                                               pressable
                                               screen]]
             [money.navigation :refer [!navigation]]
@@ -21,11 +22,12 @@
      [account-list {:navigation navigation}]]))
 
 (defn root []
-  [navigation-container {:ref #(reset! !navigation %)
-                         :on-ready #(dispatch [:ui-ready])}
-   [navigator {:initialRouteName "Loading"}
-    [screen {:name "Loading" :component (r/reactify-component loading-screen)}]
-    [screen {:name "Home" :component (r/reactify-component home-screen)}]
-    [screen {:name "Account-Overview" :component (r/reactify-component account-overview)}]
-    [screen {:name "Transaction" :component (r/reactify-component transaction-screen)}]]])
+  [paper-provider
+   [navigation-container {:ref #(reset! !navigation %)
+                          :on-ready #(dispatch [:ui-ready])}
+    [navigator {:initialRouteName "Loading"}
+     [screen {:name "Loading" :component (r/reactify-component loading-screen)}]
+     [screen {:name "Home" :component (r/reactify-component home-screen)}]
+     [screen {:name "Account-Overview" :component (r/reactify-component account-overview)}]
+     [screen {:name "Transaction" :component (r/reactify-component transaction-screen)}]]]])
 

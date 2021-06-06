@@ -1,9 +1,10 @@
 (ns money.components.account-overview
   (:require [money.components.utils :refer [js->clj-keywordized]]
-            [money.default-components :refer [pressable]]
+            [money.default-components :refer [fab portal portal-host pressable]]
             [reagent.core :as r]
             [reagent.react-native :as rn]
-            [re-frame.core :refer [dispatch subscribe]]))
+            [re-frame.core :refer [dispatch subscribe]]
+            ["@react-navigation/native" :as rnn]))
 
 (defn account-list []
   (let [accounts (subscribe [:account-names])]
@@ -45,10 +46,21 @@
 (defn render-transaction [props]
   (r/as-element [transaction (js->clj-keywordized props)]))
 
+(defn account-overview-fn []
+  (let [is-focused? (rnn/useIsFocused)
+        overview (subscribe [:account-overview])]
+    [rn/view {:style {:container {:flex 1}}}
+     [rn/flat-list {:data @overview
+                    :renderItem render-transaction}]
+     [portal
+      [fab {:icon "plus"
+            :visible is-focused?
+            :on-press #(dispatch [:new-transaction])
+            :style {:position "absolute"
+                    :bottom 16
+                    :right 16}}]]]))
+
 (defn account-overview []
-  (let [overview (subscribe [:account-overview])]
-    (fn []
-      [rn/flat-list {:data @overview
-                     :renderItem render-transaction}])))
+  [:f> account-overview-fn])
 
 
