@@ -34,7 +34,7 @@
                                (rf/path ::db/data ::t/transactions)])
 
 (def transaction-screen-interceptors
-  [check-spec-interceptora
+  [check-spec-interceptor
    ->store
    (rf/path ::db/screen-states ::st/transaction-screen-state)])
 
