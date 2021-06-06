@@ -74,3 +74,15 @@
     (if (nil? screen-state)
       nil
       (tp/present-transaction-screen screen-state accounts))))
+
+(rf/reg-sub
+  :transaction-screen-description
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/description screen)))
+
+(rf/reg-sub
+  :transaction-screen-date
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/date screen)))

@@ -33,6 +33,11 @@
                                ->store
                                (rf/path ::db/data ::t/transactions)])
 
+(def transaction-screen-interceptors
+  [check-spec-interceptora
+   ->store
+   (rf/path ::db/screen-states ::st/transaction-screen-state)])
+
 (def data-interceptors [check-spec-interceptor
                         ->store])
 
@@ -99,6 +104,12 @@
      db
      (update-in db [::db/screen-states ::st/transaction-screen-state]
                 #(st/update-transaction-date % date)))))
+
+(rf/reg-event-db
+  :update-transaction-description
+  transaction-screen-interceptors
+  (fn [screen-state [_ description]]
+    (assoc screen-state ::st/description description)))
 
 (rf/reg-event-db
  :update-transaction-data

@@ -20,6 +20,7 @@
 (def paper-provider (r/adapt-react-class rnp/Provider))
 (def portal (r/adapt-react-class rnp/Portal))
 (def portal-host (r/adapt-react-class (.-Host rnp/Portal)))
+(def text-input (r/adapt-react-class rnp/TextInput))
 
 ; (defn alert [title]
 ;       (.alert (.-Alert ReactNative) title))
