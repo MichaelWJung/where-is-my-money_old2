@@ -4,6 +4,8 @@
             [re-frame.core :refer [dispatch subscribe]]
             [money.default-components :refer [button
                                               date-time-picker
+                                              picker
+                                              picker-item
                                               text-input]]
             [money.core.presenters.transaction-presenter :as tp]))
 
@@ -22,7 +24,7 @@
        {:label "Amount"
         :default-value @amount
         :keyboard-type "numeric"
-        :on-change-text #(dispatch [:update-transaction-amount (js/parseFloat %)])}])))
+        :on-change-text #(dispatch [:update-transaction-amount %])}])))
 
 (defn date-field []
   (let [date (subscribe [:transaction-screen-date])
@@ -41,6 +43,19 @@
                             (dispatch [:update-transaction-date unix-time])))
                         (reset! editing-date false))}])])))
 
+(defn account-picker []
+  (let [selected-id (subscribe [:transaction-screen-selected-account])
+        accounts (subscribe [:transaction-screen-accounts])
+        selected-account (r/atom @selected-id)]
+    [picker
+     {:selected-value @selected-id
+      :on-value-change #(dispatch [:update-transaction-account %1])}
+     (for [[i acc] (map-indexed vector @accounts)]
+       [picker-item
+        {:key i
+         :label acc
+         :value i}])]))
+
 (defn ok-button []
   (let [button-text (subscribe [:transaction-screen-ok-button-text])]
     [button {:mode "contained"
@@ -52,4 +67,5 @@
    [description-input]
    [amount-input]
    [date-field]
+   [account-picker]
    [ok-button]])

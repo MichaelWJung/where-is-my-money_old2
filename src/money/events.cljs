@@ -109,13 +109,28 @@
   :update-transaction-amount
   transaction-screen-interceptors
   (fn [screen-state [_ amount]]
-    (assoc screen-state ::st/amount amount)))
+    (update screen-state ::st/amount #(st/update-amount % amount))))
 
 (rf/reg-event-db
   :update-transaction-description
   transaction-screen-interceptors
   (fn [screen-state [_ description]]
-    (assoc screen-state ::st/description description)))
+    (update screen-state ::st/description #(st/update-description % description))))
+
+(rf/reg-event-db
+  :update-transaction-account
+  data-interceptors
+  (fn [db [_ new-account]]
+    (if-not (contains? (::db/screen-states db) ::st/transaction-screen-state)
+      db
+      (let [accounts (get-in db [::db/data ::a/accounts])]
+        (try
+          (update-in db
+                     [::db/screen-states ::st/transaction-screen-state]
+                     #(st/update-account % accounts new-account))
+          (catch ExceptionInfo e
+            (prn (ex-data e))
+            db))))))
 
 (rf/reg-event-db
  :update-transaction-data

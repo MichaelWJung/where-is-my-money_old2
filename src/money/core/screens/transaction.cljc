@@ -27,6 +27,15 @@
     (throw (ex-info "Missing values" {})))
   (assoc screen ::date date))
 
+(defn update-description [screen new-description]
+  (assoc screen ::description new-description))
+
+(defn update-amount [screen new-amount]
+  (assoc screen ::amount (string->amount new-amount)))
+
+(defn update-account [screen accounts new-account-idx]
+  (assoc screen ::account-id (aa/account-idx->id accounts new-account-idx)))
+
 (defn update-screen [screen accounts new-data]
   (let [{:keys [description date account-idx amount]} new-data]
     (s/assert ::transaction-screen-state screen)

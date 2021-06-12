@@ -98,3 +98,15 @@
   :<- [:transaction-screen]
   (fn [screen _]
     (::tp/ok-button-text screen)))
+
+(rf/reg-sub
+  :transaction-screen-selected-account
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/selected-account screen)))
+
+(rf/reg-sub
+  :transaction-screen-accounts
+  :<- [:transaction-screen]
+  (fn [screen _]
+    (::tp/accounts screen)))

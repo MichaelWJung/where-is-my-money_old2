@@ -19,6 +19,71 @@
 (defn- account [name_]
   {::a/name name_ ::a/currency 0 ::a/parent nil ::a/type :normal})
 
+(deftest update-description
+  (testing "Transaction screen data is updated correctly"
+    (is (= (st/update-description
+             {::st/description "Buy gold"
+              ::st/date 12345678910
+              ::st/account-id 0
+              ::st/amount 10.0
+              ::st/id 6
+              ::st/new? true}
+             "Buy bitcoin")
+           {::st/description "Buy bitcoin"
+            ::st/date 12345678910
+            ::st/account-id 0
+            ::st/amount 10.0
+            ::st/id 6
+            ::st/new? true}))))
+
+(deftest update-amount
+  (testing "Transaction screen data is updated correctly"
+    (is (= (st/update-amount
+             {::st/description "Buy gold"
+              ::st/date 12345678910
+              ::st/account-id 0
+              ::st/amount 10.0
+              ::st/id 6
+              ::st/new? true}
+             "20.0")
+           {::st/description "Buy gold"
+            ::st/date 12345678910
+            ::st/account-id 0
+            ::st/amount 20.0
+            ::st/id 6
+            ::st/new? true})))
+  (testing "Fails on invalid amount"
+    (is (thrown?
+          ExceptionInfo
+          (st/update-amount
+            {::st/description "Buy gold"
+             ::st/date 12345678910
+             ::st/account-id 0
+             ::st/amount 10.0
+             ::st/id 6
+             ::st/new? true}
+            "008")))))
+
+(deftest update-account
+  (testing "Transaction screen data is updated correctly"
+    (is (= (st/update-account
+             {::st/description "Buy gold"
+              ::st/date 12345678910
+              ::st/account-id 0
+              ::st/amount 10.0
+              ::st/id 6
+              ::st/new? true}
+             {3 (account "Car")
+              7 (account "Insurance")
+              10 (account "Entertainment")}
+              2)
+           {::st/description "Buy gold"
+            ::st/date 12345678910
+            ::st/account-id 7
+            ::st/amount 10.0
+            ::st/id 6
+            ::st/new? true}))))
+
 (deftest update-transaction-screen
   (testing "Transaction screen data is updated correctly"
     (is (= (st/update-screen

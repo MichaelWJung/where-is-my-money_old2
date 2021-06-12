@@ -4,6 +4,7 @@
             ["react-native-paper" :as rnp]
             ["@react-navigation/native" :refer [NavigationContainer]]
             ["@react-navigation/stack" :refer [createStackNavigator]]
+            ["@react-native-picker/picker" :refer [Picker]]
             ["@react-native-community/datetimepicker" :as DateTimePicker]))
 
 (def pressable (r/adapt-react-class rn/Pressable))
@@ -21,6 +22,9 @@
 (def portal (r/adapt-react-class rnp/Portal))
 (def portal-host (r/adapt-react-class (.-Host rnp/Portal)))
 (def text-input (r/adapt-react-class rnp/TextInput))
+
+(def picker (r/adapt-react-class Picker))
+(def picker-item (r/adapt-react-class (.-Item Picker)))
 
 ; (defn alert [title]
 ;       (.alert (.-Alert ReactNative) title))
