@@ -6,10 +6,8 @@
             [money.components.app-root :refer [root]]
             [money.db :refer [generated-db]]
             [money.events]
-            [money.subs]))
-
-; (def ReactNative (js/require "react-native"))
-; (def app-registry (.-AppRegistry ReactNative))
+            [money.subs]
+            ["react-native" :refer [AppRegistry]]))
 
 (defn app-root []
   [root])
@@ -22,8 +20,19 @@
   (dispatch [:load-db (cljs.reader/read-string serialized)])
   (dispatch [:toast "App db loaded from storage"]))
 
-(defn ^:export -main [& args]
-  (dispatch-sync [:initialize-db])
+(defonce component-to-update (atom nil))
+
+(def updatable-app-root
+  (with-meta app-root
+    {:component-did-mount
+     (fn [] (this-as ^js this
+                     (reset! component-to-update this)))}))
+
+(defn reload {:dev/after-load true} []
+  (.forceUpdate ^js @component-to-update))
+
+(defn init []
+  (dispatch-sync [:initialize-db {}])
   (-> money.events/async-storage
       (.getItem "db")
       (.then #(if (nil? %)
@@ -31,8 +40,4 @@
                 (load-db %)))
       (.catch use-default-db)
       (.finally #(dispatch [:db-ready])))
-  (r/as-element [app-root]))
-
-; (defn init []
-;   (dispatch-sync [:initialize-db {}])
-;   (.registerComponent app-registry "WhereIsMyMoney" #(r/reactify-component app-root)))
+  (.registerComponent AppRegistry "WhereIsMyMoney" #(r/reactify-component updatable-app-root)))

@@ -47,8 +47,36 @@
     (let [^js navigation @!navigation]
       (case action
         :go-back (.dispatch navigation (.goBack CommonActions))
-        :navigate (.navigate navigation target)
-        :reset (.dispatch navigation (.replace StackActions "Home"))))))
+        :navigate (.dispatch
+                    navigation
+                    (.reset CommonActions
+                            (clj->js
+                              {:type "stack"
+                               :key "stack-1"
+                               :routeNames ["Loading"
+                                            "Home"
+                                            "Account-Overview"
+                                            "Transaction"]
+                               :routes
+                               (case target
+                                 ::db/home-screen
+                                 [{:key "home-1"
+                                   :name "Home"}]
+
+                                 ::db/account-overview
+                                 [{:key "home-1"
+                                   :name "Home"}
+                                  {:key "account-overview-1"
+                                   :name "Account-Overview"}]
+
+                                 ::db/transaction-screen
+                                 [{:key "home-1"
+                                   :name "Home"}
+                                  {:key "account-overview-1"
+                                   :name "Account-Overview"}
+                                  {:key "transaction-1"
+                                   :name "Transaction"}]
+                                 )})))))))
 
 (rf/reg-fx
  :persist
@@ -67,6 +95,38 @@
  :now
  (fn [cofx _data]
    (assoc cofx :now (.now js/Date))))
+
+(rf/reg-event-db
+  :record-navigating-back
+  [check-spec-interceptor]
+  (fn [db _]
+    (let [source (::db/navigation db)]
+      (assoc db ::db/navigation
+             (case source
+               ::db/account-overview ::db/home-screen
+               ::db/transaction-screen ::db/account-overview)))))
+
+(rf/reg-event-fx
+  :navigate-to
+  [check-spec-interceptor]
+  (fn [{:keys [db]} [_ target]]
+    (let [source (::db/navigation db)
+          fx (case [source target]
+               [::db/home-screen ::db/account-overview]
+               [[:navigation [:navigate ::db/account-overview]]]
+
+               [::db/account-overview ::db/transaction-screen]
+               [[:navigation [:navigate ::db/transaction-screen]]]
+
+               [::db/transaction-screen ::db/account-overview]
+               [[:navigation [:go-back]]]
+
+               [::db/account-overview ::db/home-screen]
+               [[:navigation [:go-back]]]
+               )]
+      (prn :navigate-to " Source: " source ", Target: " target)
+      {:db (assoc db ::db/navigation target)
+       :fx fx})))
 
 (rf/reg-event-db
  :initialize-db
@@ -88,7 +148,7 @@
      {:db (assoc-in db
                     [::db/screen-states ::sa/account-screen-state ::sa/account-id]
                     (aa/account-idx->id accounts account-idx))
-      :fx [[:navigation [:navigate "Account-Overview"]]]})))
+      :fx [[:dispatch [:navigate-to ::db/account-overview]]]})))
 
 (rf/reg-event-db
  :remove-transaction
@@ -98,39 +158,31 @@
 
 (rf/reg-event-db
  :update-transaction-date
- data-interceptors
- (fn [db [_ date]]
-   (if-not (contains? (::db/screen-states db) ::st/transaction-screen-state)
-     db
-     (update-in db [::db/screen-states ::st/transaction-screen-state]
-                #(st/update-transaction-date % date)))))
+ transaction-screen-interceptors
+ (fn [screen-state [_ date]]
+   (st/update-transaction-date screen-state date)))
 
 (rf/reg-event-db
   :update-transaction-amount
   transaction-screen-interceptors
   (fn [screen-state [_ amount]]
-    (update screen-state ::st/amount #(st/update-amount % amount))))
+    (st/update-amount screen-state amount)))
 
 (rf/reg-event-db
   :update-transaction-description
   transaction-screen-interceptors
   (fn [screen-state [_ description]]
-    (update screen-state ::st/description #(st/update-description % description))))
+    (st/update-description screen-state description)))
 
 (rf/reg-event-db
   :update-transaction-account
   data-interceptors
   (fn [db [_ new-account]]
-    (if-not (contains? (::db/screen-states db) ::st/transaction-screen-state)
-      db
-      (let [accounts (get-in db [::db/data ::a/accounts])]
-        (try
-          (update-in db
-                     [::db/screen-states ::st/transaction-screen-state]
-                     #(st/update-account % accounts new-account))
-          (catch ExceptionInfo e
-            (prn (ex-data e))
-            db))))))
+    (let [accounts (get-in db [::db/data ::a/accounts])]
+      (update-in
+        db
+        [::db/screen-states ::st/transaction-screen-state]
+        #(st/update-account % accounts new-account)))))
 
 (rf/reg-event-db
  :update-transaction-data
@@ -164,7 +216,7 @@
               (update-in [::db/data ::t/transactions]
                          #(t/add-transaction % new-transaction))
               (assoc ::db/navigation :account))
-      :fx [[:navigation [:go-back]]]})))
+      :fx [[:dispatch [:navigate-to ::db/account-overview]]]})))
 
 (rf/reg-event-fx
  :edit-transaction
@@ -174,11 +226,10 @@
          current-account (get-in db [::db/screen-states
                                      ::sa/account-screen-state
                                      ::sa/account-id])]
-     {:db (-> db
-              (assoc-in [::db/screen-states ::st/transaction-screen-state]
-                        (st/transaction->screen-data current-account transaction))
-              (assoc ::db/navigation :transaction))
-      :fx [[:navigation [:navigate "Transaction"]]]})))
+     {:db (assoc-in db
+                    [::db/screen-states ::st/transaction-screen-state]
+                    (st/transaction->screen-data current-account transaction))
+      :fx [[:dispatch [:navigate-to ::db/transaction-screen]]]})))
 
 (rf/reg-event-fx
  :new-transaction
@@ -193,9 +244,8 @@
      {:db (-> db
               (assoc-in [::db/screen-states ::st/transaction-screen-state]
                         (st/new-transaction id now 0))
-              (assoc-in [:highest-ids :transaction] id)
-              (assoc ::db/navigation :transaction))
-      :fx [[:navigation [:navigate "Transaction"]]]})))
+              (assoc-in [:highest-ids :transaction] id))
+      :fx [[:dispatch [:navigate-to ::db/transaction-screen]]]})))
 
 (rf/reg-event-db
  :close-transaction-screen
@@ -227,7 +277,7 @@
          db-ready? (get-in db [::db/startup ::db/db-ready?])]
      (if (and ui-ready? db-ready?)
        {:db db
-        :fx [[:navigation [:reset]]]}
+        :fx [[:navigation [:navigate (::db/navigation db)]]]}
        {:db db}))))
 
 (rf/reg-event-fx

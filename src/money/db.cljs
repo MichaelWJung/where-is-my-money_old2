@@ -8,10 +8,10 @@
 (s/def ::currencies (constantly true))
 (s/def ::data (s/keys :req [::a/accounts ::t/transactions ::currencies]))
 
-(s/def ::screen-states (s/keys :req [::sa/account-screen-state]
-                               :opt [::st/transaction-screen-state]))
+(s/def ::screen-states (s/keys :req [::sa/account-screen-state
+                                     ::st/transaction-screen-state]))
 
-(s/def ::navigation #{:transaction :account})
+(s/def ::navigation #{::transaction-screen ::home-screen ::account-overview})
 
 (s/def ::db-ready? boolean?)
 (s/def ::ui-ready? boolean?)
@@ -67,8 +67,15 @@
           ::a/accounts (conj {} (generate-account 0))
           ::currencies []}
    ::screen-states {::sa/account-screen-state
-                    {::sa/account-id 0}}
-   ::navigation :account
+                    {::sa/account-id 0}
+                    ::st/transaction-screen-state
+                    {::st/description ""
+                     ::st/date 1
+                     ::st/account-id 0
+                     ::st/amount 0.0
+                     ::st/id 0
+                     ::st/new? true}}
+   ::navigation ::home-screen
    ::startup {::db-ready? false ::ui-ready? false}
    :highest-ids {:transaction 1}})
 
@@ -76,7 +83,4 @@
   {::data {::t/transactions (generate-transactions)
           ::a/accounts (generate-accounts)
           ::currencies []}
-   ::screen-states {::sa/account-screen-state
-                    {::sa/account-id 0}}
-   ::navigation :account
    :highest-ids {:transaction 1}})

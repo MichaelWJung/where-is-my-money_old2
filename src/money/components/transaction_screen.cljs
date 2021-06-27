@@ -7,7 +7,8 @@
                                               picker
                                               picker-item
                                               text-input]]
-            [money.core.presenters.transaction-presenter :as tp]))
+            [money.core.presenters.transaction-presenter :as tp]
+            [money.helpers :refer [record-back-navigation]]))
 
 (defn description-input []
   (let [description (subscribe [:transaction-screen-description])]
@@ -62,10 +63,14 @@
              :on-press #(dispatch [:save-transaction])}
      @button-text]))
 
-(defn transaction-screen []
+(defn transaction-screen-fn []
+  (record-back-navigation)
   [:<>
    [description-input]
    [amount-input]
    [date-field]
    [account-picker]
    [ok-button]])
+
+(defn transaction-screen []
+  [:f> transaction-screen-fn])
