@@ -11,7 +11,8 @@
             [money.components.account-overview :refer [account-list
                                                        account-overview]]
             [money.components.transaction-screen :refer [transaction-screen]]
-            [money.components.utils :refer [js->clj-keywordized]]
+            [money.components.utils :refer [js->clj-keywordized
+                                            record-navigation-state]]
             ["react-native-paper" :as rnp]
             ["@react-navigation/native" :as rnn]))
 
@@ -25,10 +26,14 @@
   [rn/view
    [rn/text {:style {:color "blue"}} "Loading..."]])
 
-(defn home-screen []
+(defn home-screen-fn []
   (fn [{:keys [navigation]}]
+    (record-navigation-state :money.db/home-screen)
     [rn/view {:style {:flex-direction "column" :margin 10 :align-items "flex-start"}}
      [account-list {:navigation navigation}]]))
+
+(defn home-screen []
+  [:f> home-screen-fn])
 
 (defn root []
   [paper-provider {:theme (clj->js default-theme)}

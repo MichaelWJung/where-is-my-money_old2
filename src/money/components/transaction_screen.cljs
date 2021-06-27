@@ -2,13 +2,13 @@
   (:require [reagent.core :as r]
             [reagent.react-native :as rn]
             [re-frame.core :refer [dispatch subscribe]]
+            [money.components.utils :refer [record-navigation-state]]
+            [money.core.presenters.transaction-presenter :as tp]
             [money.default-components :refer [button
                                               date-time-picker
                                               picker
                                               picker-item
-                                              text-input]]
-            [money.core.presenters.transaction-presenter :as tp]
-            [money.helpers :refer [record-back-navigation]]))
+                                              text-input]]))
 
 (defn description-input []
   (let [description (subscribe [:transaction-screen-description])]
@@ -64,7 +64,7 @@
      @button-text]))
 
 (defn transaction-screen-fn []
-  (record-back-navigation)
+  (record-navigation-state :money.db/transaction-screen)
   [:<>
    [description-input]
    [amount-input]

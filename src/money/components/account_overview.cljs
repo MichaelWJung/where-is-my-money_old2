@@ -1,8 +1,8 @@
 (ns money.components.account-overview
-  (:require [money.components.utils :refer [js->clj-keywordized]]
+  (:require [money.components.utils :refer [js->clj-keywordized
+                                            record-navigation-state]]
             [money.core.presenters.account-presenter :as ap]
             [money.default-components :refer [fab portal portal-host pressable]]
-            [money.helpers :refer [record-back-navigation]]
             [reagent.core :as r]
             [reagent.react-native :as rn]
             [re-frame.core :refer [dispatch subscribe]]
@@ -53,7 +53,7 @@
     (str (:id i) "_" (:split-id i))))
 
 (defn account-overview-fn []
-  (record-back-navigation)
+  (record-navigation-state :money.db/account-overview)
   (let [is-focused? (rnn/useIsFocused)
         overview (subscribe [:account-overview])]
     [rn/view {:style {:container {:flex 1}}}
